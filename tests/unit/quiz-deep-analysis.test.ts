@@ -63,4 +63,10 @@ describe("buildDeepAnalysisSystemPrompt", () => {
     expect(rational).toContain("理性客观");
     expect(new Set([humor, warm, rational]).size).toBe(3);
   });
+
+  it("asks for plain text, not markdown headings", () => {
+    const p = buildDeepAnalysisSystemPrompt("humor");
+    expect(p).toContain("纯文本");
+    expect(p).not.toMatch(/^##\s/m);
+  });
 });
