@@ -55,6 +55,14 @@ cp .env.example .env
 - `BOOTSTRAP_SETUP_SECRET`: 首次系统初始化密钥
 - `BOOTSTRAP_ALLOW_IN_PROD`: 生产是否允许 bootstrap/seed（默认 `false`）
 
+H5 结果页 **深度分析**（`POST /api/quiz_play/result/analyze`）请求体除 `token`、`resultId` 外须带 **`style`**：`humor`（幽默诙谐）｜`warm`（温暖共情）｜`rational`（理性客观），与页面三选一风格一致。
+
+大模型走 **OpenAI 兼容的 Chat Completions** 协议，仅使用环境变量名 `LLM_*`：
+
+- `LLM_API_KEY`：鉴权。未设置则结果页不展示深度分析
+- `LLM_MODEL`：模型 id，选填，缺省为 `gpt-4o-mini`（应改为你方网关/本地实际模型名）
+- `LLM_BASE_URL`：API 根地址，选填（如 Ollama `http://localhost:11434/v1`、自建网关、第三方 OpenAI 兼容服务）；不填时 SDK 使用其默认的 OpenAI 公网端点
+
 ### 3) 初始化数据库结构
 
 ```bash

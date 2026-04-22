@@ -94,11 +94,24 @@ export async function seedQuizzesFromPythonGenerated(): Promise<SeedSummary> {
         const row = item as Record<string, unknown>;
         const outcomeCode = String(row.code ?? `outcome_${index + 1}`);
         const isFallback = Boolean(row.is_fallback ?? row.isFallback ?? false) || (fallbackCode ? fallbackCode === outcomeCode : false);
+        const baseMatch = { ...((row.match_config ?? row.matchConfig ?? {}) as Record<string, unknown>) };
+        const summary = row.summary;
+        const detail = row.detail;
+        if (typeof summary === "string" && summary.length > 0) {
+          baseMatch.summary = summary;
+        }
+        if (typeof detail === "string" && detail.length > 0) {
+          baseMatch.detail = detail;
+        }
+        const tagRow = row.tags;
+        if (Array.isArray(tagRow) && tagRow.length > 0) {
+          baseMatch.tags = tagRow.map((t) => String(t));
+        }
         return {
           code: outcomeCode,
           name: String(row.name ?? `结果 ${index + 1}`),
           description: String(row.summary ?? row.detail ?? ""),
-          matchConfig: (row.match_config ?? row.matchConfig ?? {}) as Record<string, unknown>,
+          matchConfig: baseMatch,
           isFallback,
           isSpecial: Boolean(row.is_special ?? row.isSpecial ?? false),
         };

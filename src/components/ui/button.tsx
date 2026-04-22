@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -35,8 +36,32 @@ const buttonVariants = cva(
   },
 );
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {}
+const spinnerSize: Record<"default" | "sm" | "lg" | null, string> = {
+  default: "size-4",
+  sm: "size-3.5",
+  lg: "size-[1.1rem]",
+  null: "size-4",
+};
 
-export function Button({ className, variant, size, ...props }: ButtonProps) {
-  return <button className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  loading?: boolean;
+}
+
+export function Button({ className, variant, size, loading, disabled, children, ...props }: ButtonProps) {
+  const isBusy = Boolean(loading);
+  return (
+    <button
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        isBusy && "gap-2",
+      )}
+      disabled={disabled || isBusy}
+      aria-busy={isBusy || undefined}
+      data-loading={isBusy ? "" : undefined}
+      {...props}
+    >
+      {isBusy ? <Loader2 className={cn("shrink-0 animate-spin", spinnerSize[size ?? "default"])} aria-hidden /> : null}
+      {children}
+    </button>
+  );
 }

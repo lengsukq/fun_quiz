@@ -1,8 +1,11 @@
 import { randomUUID } from "node:crypto";
 
 import { AppError } from "@/lib/errors";
+import { isDeepAnalysisLlmConfigured } from "@/lib/llm-env";
 import { createId } from "@/lib/id";
+import { requestQuizDeepAnalysis } from "@/server/services/quiz-deep-analysis";
 import { calculateQuizResult } from "@/server/services/quiz-algorithm-service";
+import type { DeepAnalysisStyle, QuizFileRef, QuizResultView, QuizDeepAnalysisView } from "@/types/quiz-play";
 import {
   attachQuizIdsToToken,
   createQuizResult,
@@ -350,15 +353,112 @@ export async function submitQuiz(input: { token: string; quizId: string; answers
   return { resultId };
 }
 
-export async function getQuizResult(tokenValue: string, resultId: string) {
+function parseStringFromMatchConfig(
+  config: Record<string, unknown> | null | undefined,
+  key: string,
+): string | null {
+  const v = config?.[key];
+  return typeof v === "string" ? v : null;
+}
+
+function resolveOutcomeNarrative(outcome: { description: string | null; matchConfig: unknown } | null): {
+  outcomeSummary: string | null;
+  outcomeDetail: string | null;
+} {
+  if (!outcome) {
+    return { outcomeSummary: null, outcomeDetail: null };
+  }
+  const matchConfig = (outcome.matchConfig as Record<string, unknown>) ?? {};
+  const fromSummary = parseStringFromMatchConfig(matchConfig, "summary");
+  const fromDetail = parseStringFromMatchConfig(matchConfig, "detail");
+  if (fromSummary !== null || fromDetail !== null) {
+    return { outcomeSummary: fromSummary, outcomeDetail: fromDetail };
+  }
+  const text = (outcome.description ?? "").trim();
+  if (!text) {
+    return { outcomeSummary: null, outcomeDetail: null };
+  }
+  const splitAt = text.indexOf("\n\n");
+  if (splitAt > 0) {
+    return {
+      outcomeSummary: text.slice(0, splitAt).trim() || null,
+      outcomeDetail: text.slice(splitAt + 2).trim() || null,
+    };
+  }
+  return { outcomeSummary: null, outcomeDetail: text };
+}
+
+function resolveOutcomeTags(matchConfig: unknown): string[] {
+  const tags = (matchConfig as Record<string, unknown> | null)?.tags;
+  if (!Array.isArray(tags)) return [];
+  return tags.filter((t): t is string => typeof t === "string");
+}
+
+function toFileRefFromUrl(maybe: string | null | undefined): QuizFileRef {
+  if (!maybe || !String(maybe).trim()) return null;
+  return { url: String(maybe).trim() };
+}
+
+export async function getQuizResult(tokenValue: string, resultId: string): Promise<QuizResultView> {
   const entry = await quizEntry(tokenValue);
   const result = await findQuizResultById(resultId);
   if (!result || result.tokenId !== entry.token.id) throw new AppError("Result not found or forbidden", 404);
+  const quiz = await findQuizById(result.quizId);
+  if (!quiz) throw new AppError("Quiz not found", 404);
   const outcome = result.outcomeCode ? await findOutcomeByCode(result.quizId, result.outcomeCode) : null;
+  const { outcomeSummary, outcomeDetail } = resolveOutcomeNarrative(outcome);
+  const outcomeTags = outcome ? resolveOutcomeTags(outcome.matchConfig) : [];
+  const matchConfig = (outcome?.matchConfig as Record<string, unknown>) ?? {};
+  const avatarUrl = parseStringFromMatchConfig(matchConfig, "avatarUrl");
   return {
-    ...result,
+    resultId: result.id,
+    quizId: result.quizId,
+    quizName: quiz.name,
+    quizType: quiz.quizType,
+    outcomeCode: result.outcomeCode,
     outcomeName: outcome?.name ?? null,
+    score: result.score,
+    outcomeSummary,
+    outcomeDetail,
+    outcomeTags,
+    outcomeAvatar: toFileRefFromUrl(avatarUrl),
+    shareImage: toFileRefFromUrl(result.shareImage),
+    resultConfig: quiz.resultConfig,
+    calcResult: result.calcResult,
+    deepAnalysisAvailable: isDeepAnalysisLlmConfigured(),
   };
+}
+
+export async function analyzeQuizResultDeep(
+  tokenValue: string,
+  resultId: string,
+  style: DeepAnalysisStyle,
+): Promise<QuizDeepAnalysisView> {
+  const entry = await quizEntry(tokenValue);
+  const result = await findQuizResultById(resultId);
+  if (!result || result.tokenId !== entry.token.id) {
+    throw new AppError("Result not found or forbidden", 404);
+  }
+  const quiz = await findQuizById(result.quizId);
+  if (!quiz) throw new AppError("Quiz not found", 404);
+  const outcome = result.outcomeCode ? await findOutcomeByCode(result.quizId, result.outcomeCode) : null;
+  const { outcomeSummary, outcomeDetail } = resolveOutcomeNarrative(outcome);
+  const questions = await listQuizQuestions(result.quizId);
+  return requestQuizDeepAnalysis({
+    style,
+    quizName: quiz.name,
+    quizType: quiz.quizType,
+    score: result.score,
+    outcomeName: outcome?.name ?? null,
+    outcomeSummary,
+    outcomeDetail,
+    answers: result.answers,
+    questions: questions.map((item) => ({
+      seq: item.seq,
+      content: item.content,
+      options: (item.options as Array<Record<string, unknown>>) ?? [],
+    })),
+  });
 }
 
 export async function getEntryQuizzes(input: {

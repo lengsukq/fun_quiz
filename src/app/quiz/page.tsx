@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { QuizPageFallback, QuizPageShell } from "@/components/quiz/quiz-page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ContentLoading, SectionLoader } from "@/components/ui/loading-state";
 import {
   List,
   ListEmpty,
@@ -44,56 +45,66 @@ function QuizEntryContent() {
   const [historyList, setHistoryList] = useState<HistoryItem[]>([]);
   const [entryMeta, setEntryMeta] = useState<EntryMeta | null>(null);
   const [error, setError] = useState("");
+  const [quizzesSettled, setQuizzesSettled] = useState(true);
+  const [historySettled, setHistorySettled] = useState(true);
 
   useEffect(() => {
     if (!token) {
       setEntryMeta(null);
       setQuizList([]);
       setHistoryList([]);
+      setError("");
+      setQuizzesSettled(true);
+      setHistorySettled(true);
       return;
     }
 
     let cancelled = false;
+    setError("");
+    setQuizzesSettled(false);
+    setHistorySettled(false);
+
     async function loadEntryData() {
-      setError("");
       try {
         const meta = await postJson<EntryMeta>("/api/quiz_play/entry", { token });
-        if (!cancelled) {
-          setEntryMeta(meta);
+        if (cancelled) {
+          return;
         }
-      } catch (entryError) {
-        if (!cancelled) {
-          setEntryMeta(null);
+        setEntryMeta(meta);
+
+        const [quizzesRes, historyRes] = await Promise.allSettled([
+          postJson<{ list: EntryQuiz[] }>("/api/quiz_play/entry/quizzes", { token, pageIndex: 1, pageSize: 20 }),
+          postJson<{ list: HistoryItem[] }>("/api/quiz_play/entry/history", { token, pageIndex: 1, pageSize: 10 }),
+        ]);
+        if (cancelled) {
+          return;
+        }
+
+        if (quizzesRes.status === "fulfilled") {
+          setQuizList(quizzesRes.value.list);
+        } else {
           setQuizList([]);
-          setHistoryList([]);
-          setError(entryError instanceof Error ? entryError.message : "Token 校验失败");
+          setError(quizzesRes.reason instanceof Error ? quizzesRes.reason.message : "测验列表加载失败");
         }
-        return;
+        setQuizzesSettled(true);
+
+        if (historyRes.status === "fulfilled") {
+          setHistoryList(historyRes.value.list);
+        } else {
+          setHistoryList([]);
+        }
+        setHistorySettled(true);
+      } catch (entryError) {
+        if (cancelled) {
+          return;
+        }
+        setEntryMeta(null);
+        setQuizList([]);
+        setHistoryList([]);
+        setError(entryError instanceof Error ? entryError.message : "Token 校验失败");
+        setQuizzesSettled(true);
+        setHistorySettled(true);
       }
-
-      postJson<{ list: EntryQuiz[] }>("/api/quiz_play/entry/quizzes", { token, pageIndex: 1, pageSize: 20 })
-        .then((res) => {
-          if (!cancelled) {
-            setQuizList(res.list);
-          }
-        })
-        .catch((entryError) => {
-          if (!cancelled) {
-            setError(entryError instanceof Error ? entryError.message : "测验列表加载失败");
-          }
-        });
-
-      postJson<{ list: HistoryItem[] }>("/api/quiz_play/entry/history", { token, pageIndex: 1, pageSize: 10 })
-        .then((res) => {
-          if (!cancelled) {
-            setHistoryList(res.list);
-          }
-        })
-        .catch(() => {
-          if (!cancelled) {
-            setHistoryList([]);
-          }
-        });
     }
 
     void loadEntryData();
@@ -112,6 +123,11 @@ function QuizEntryContent() {
           : entryMeta.status
     : "-";
 
+  const listEmpty =
+    token && quizzesSettled && !error && quizList.length === 0;
+  const listLoading = Boolean(token) && !quizzesSettled;
+  const showHistoryEmpty = token && historySettled && historyList.length === 0;
+
   return (
     <QuizPageShell vibrant>
       <Card className="border-primary/20">
@@ -127,6 +143,7 @@ function QuizEntryContent() {
               Token 状态：{tokenStatusText}，已使用 {entryMeta.usedCount ?? 0} / {entryMeta.maxUses ?? "不限"}
             </p>
           ) : null}
+          {listLoading ? <ContentLoading label="加载可用测验中…" minHeightClassName="min-h-[5rem]" /> : null}
           <List>
             {quizList.map((quiz) => (
               <ListItem key={quiz.id}>
@@ -139,7 +156,7 @@ function QuizEntryContent() {
                 </ListItemActions>
               </ListItem>
             ))}
-            {!quizList.length ? (
+            {listEmpty ? (
               <ListEmpty>
                 当前没有可用测验（请检查：测验是否已发布、token 是否绑定了正确的测验 ID）
               </ListEmpty>
@@ -147,6 +164,7 @@ function QuizEntryContent() {
           </List>
           <div className="mt-6 border-t border-border pt-4">
             <p className="mb-2 text-sm font-semibold text-zinc-700">历史记录</p>
+            {token && !historySettled ? <SectionLoader label="加载历史结果中…" /> : null}
             <List className="space-y-2">
               {historyList.map((history) => (
                 <ListItem key={history.id} className="p-3">
@@ -158,7 +176,7 @@ function QuizEntryContent() {
                   </Link>
                 </ListItem>
               ))}
-              {!historyList.length ? <ListEmpty className="py-3 text-xs">暂无历史结果</ListEmpty> : null}
+              {showHistoryEmpty ? <ListEmpty className="py-3 text-xs">暂无历史结果</ListEmpty> : null}
             </List>
           </div>
         </CardContent>
@@ -169,7 +187,7 @@ function QuizEntryContent() {
 
 export default function QuizEntryPage() {
   return (
-    <Suspense fallback={<QuizPageFallback text="入口加载中..." />}>
+    <Suspense fallback={<QuizPageFallback text="入口加载中…" />}>
       <QuizEntryContent />
     </Suspense>
   );

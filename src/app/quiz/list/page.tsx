@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { ContentLoading } from "@/components/ui/loading-state";
 import { postJson } from "@/lib/client-api";
 
 type QuizItem = {
@@ -25,10 +26,17 @@ export default function QuizListPage() {
   const [code, setCode] = useState("");
   const [seeding, setSeeding] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [listLoading, setListLoading] = useState(true);
+  const [createLoading, setCreateLoading] = useState(false);
 
   async function load() {
-    const data = await postJson<{ list: QuizItem[] }>("/api/quiz/page");
-    setList(data.list);
+    setListLoading(true);
+    try {
+      const data = await postJson<{ list: QuizItem[] }>("/api/quiz/page");
+      setList(data.list);
+    } finally {
+      setListLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -43,7 +51,7 @@ export default function QuizListPage() {
           <div className="flex flex-wrap gap-2">
             <Button
               variant="surface"
-              disabled={publishing}
+              loading={publishing}
               onClick={async () => {
                 if (!window.confirm("将把所有 draft 状态测验发布为 published，继续吗？")) return;
                 setPublishing(true);
@@ -59,11 +67,11 @@ export default function QuizListPage() {
                 }
               }}
             >
-              {publishing ? "发布中..." : "一键发布草稿"}
+              一键发布草稿
             </Button>
             <Button
               variant="surface"
-              disabled={seeding}
+              loading={seeding}
               onClick={async () => {
                 if (!window.confirm("将从 python/doc/generated 导入题库（已存在 code 会被更新），继续吗？")) return;
                 setSeeding(true);
@@ -88,17 +96,26 @@ export default function QuizListPage() {
                 }
               }}
             >
-              {seeding ? "导入中..." : "一键导入题库"}
+              一键导入题库
             </Button>
             <Button
+              loading={createLoading}
               onClick={async () => {
-                const created = await postJson<{ id: string }>("/api/quiz/edit", {
-                  name: name || "新测验",
-                  code: code || `quiz_${Date.now()}`,
-                  status: "draft",
-                });
-                await load();
-                window.location.href = `/quiz/detail?id=${created.id}`;
+                setCreateLoading(true);
+                try {
+                  const created = await postJson<{ id: string }>("/api/quiz/edit", {
+                    name: name || "新测验",
+                    code: code || `quiz_${Date.now()}`,
+                    status: "draft",
+                  });
+                  await load();
+                  window.location.href = `/quiz/detail?id=${created.id}`;
+                } catch (error) {
+                  const message = error instanceof Error ? error.message : "创建失败";
+                  window.alert(message);
+                } finally {
+                  setCreateLoading(false);
+                }
               }}
             >
               新建测验
@@ -113,35 +130,43 @@ export default function QuizListPage() {
         }
         headers={["名称", "编码", "类型", "状态", "操作"]}
       >
-        {list.map((item) => (
-          <TableRow key={item.id}>
-            <TableCell>{item.name}</TableCell>
-            <TableCell>{item.code}</TableCell>
-            <TableCell>{item.quizType}</TableCell>
-            <TableCell>
-              <Badge variant={item.status === "published" ? "success" : "outline"}>{item.status}</Badge>
-            </TableCell>
-            <TableCell>
-              <div className="flex gap-2">
-                <Link href={`/quiz/detail?id=${item.id}`}>
-                  <Button size="sm" variant="surface">
-                    编辑
-                  </Button>
-                </Link>
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={async () => {
-                    await postJson("/api/quiz/delete", { quizId: item.id });
-                    await load();
-                  }}
-                >
-                  删除
-                </Button>
-              </div>
+        {listLoading ? (
+          <TableRow>
+            <TableCell colSpan={5}>
+              <ContentLoading label="加载列表中…" className="py-4" minHeightClassName="min-h-0" />
             </TableCell>
           </TableRow>
-        ))}
+        ) : (
+          list.map((item) => (
+            <TableRow key={item.id}>
+              <TableCell>{item.name}</TableCell>
+              <TableCell>{item.code}</TableCell>
+              <TableCell>{item.quizType}</TableCell>
+              <TableCell>
+                <Badge variant={item.status === "published" ? "success" : "outline"}>{item.status}</Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  <Link href={`/quiz/detail?id=${item.id}`}>
+                    <Button size="sm" variant="surface">
+                      编辑
+                    </Button>
+                  </Link>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={async () => {
+                      await postJson("/api/quiz/delete", { quizId: item.id });
+                      await load();
+                    }}
+                  >
+                    删除
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
       </DataListPanel>
     </AdminShell>
   );
