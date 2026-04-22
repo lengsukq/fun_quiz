@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fun Quiz (Next.js Fullstack)
 
-## Getting Started
+基于 Next.js App Router 的趣味测验全栈项目，包含：
 
-First, run the development server:
+- 管理端（测验、题目、结果、Token、系统管理）
+- H5 答题端（Token 入口、答题、结果页）
+- 服务端 API（`src/app/api/**`）
+- Drizzle + Neon PostgreSQL 数据访问层
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+> 当前 Next.js 项目已迁移到仓库根目录运行，不再使用 `next/` 作为项目根。
+
+## Tech Stack
+
+- Next.js 16 + React 19 + TypeScript
+- Tailwind CSS 4
+- Drizzle ORM + Neon (`@neondatabase/serverless`)
+- Vitest + Playwright
+
+## Project Structure
+
+```text
+src/
+  app/                 # 页面与 API 路由
+  components/          # UI 与业务组件
+  contracts/           # 接口 schema / DTO
+  db/                  # Drizzle schema 与 db 实例
+  lib/                 # 通用工具（auth/http/env 等）
+  server/              # service/repository 业务层
+tests/                 # unit / integration / e2e
+docs/                  # 项目文档
+python/                # 原 Python 项目（迁移参考，不参与 Next 构建）
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Quick Start
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1) 安装依赖
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+yarn install
+```
 
-## Learn More
+### 2) 配置环境变量
 
-To learn more about Next.js, take a look at the following resources:
+复制 `.env.example` 为 `.env`，并按实际环境填写：
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cp .env.example .env
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+关键变量：
 
-## Deploy on Vercel
+- `DATABASE_URL`: Neon/PostgreSQL 连接串
+- `APP_JWT_SECRET`: JWT 密钥（至少 16 位）
+- `APP_JWT_EXPIRES_IN`: 访问令牌时长（默认 `2h`）
+- `BOOTSTRAP_SETUP_SECRET`: 首次系统初始化密钥
+- `BOOTSTRAP_ALLOW_IN_PROD`: 生产是否允许 bootstrap/seed（默认 `false`）
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3) 初始化数据库结构
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+yarn db:push
+```
+
+### 4) 启动开发环境
+
+```bash
+yarn dev
+```
+
+打开 [http://localhost:3000](http://localhost:3000)。
+
+## Common Commands
+
+```bash
+yarn dev              # 本地开发
+yarn build            # 生产构建
+yarn start            # 启动生产服务
+yarn lint             # ESLint
+yarn test             # 全量 Vitest
+yarn test:unit
+yarn test:integration
+yarn test:e2e
+yarn db:generate      # 生成 Drizzle migration
+yarn db:push          # 推送 schema
+yarn db:studio        # 打开 Drizzle Studio
+```
+
+## Bootstrap / Seed / Publish Flow
+
+### 系统初始化
+
+- API: `POST /api/system/bootstrap`
+- 能力：初始化角色与管理员账号
+- 生产环境默认受 `BOOTSTRAP_ALLOW_IN_PROD` 限制
+
+### 一键导入题库（来自 Python seed）
+
+- API: `POST /api/system/seed_quizzes`
+- 数据源：`python/doc/generated/*.json`
+- 行为：按 `meta.code` 幂等导入（存在则更新，不存在则创建）
+- 管理端按钮：测验列表页 `一键导入题库`
+
+### 一键发布草稿
+
+- API: `POST /api/quiz/publish_all`
+- 行为：将所有 `draft` 测验批量改为 `published`
+- 管理端按钮：测验列表页 `一键发布草稿`
+
+## Quiz Token Notes
+
+- 答题入口页面：`/quiz?token=<token>`
+- 答题端只显示：**已发布测验** + **当前 token 可访问测验**
+- `token=demo` 为保留演示令牌，支持无限使用（不消耗次数）
+
+## Troubleshooting
+
+### 构建时报错扫到 `python/` 目录 TypeScript
+
+已通过 `tsconfig.json` 将类型检查范围收口到 `src/` 与 `tests/`。如果你修改了 tsconfig，请确保未重新扩大到整个仓库。
+
+### 答题端显示“没有可用测验”
+
+优先检查：
+
+1. 测验是否已发布（`published`）
+2. token 是否有效（未过期/未耗尽）
+3. token 是否绑定了正确的 `quizIds`
+
+---
+
+更多迁移与业务说明见：`NEXTJS_REPLICA_FUNCTION_DOC.md`。
