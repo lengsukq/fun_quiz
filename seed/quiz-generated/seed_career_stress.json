@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "name": "职场压力应对小测",
+    "code": "seed_career_stress",
+    "quiz_type": "score",
+    "share_desc": "娱乐向：看看压力下你更偏「扛住」「拆解」还是「求助」。",
+    "category": "career"
+  },
+  "algo_config": { "total_max": 24 },
+  "special_rules": [],
+  "questions": [
+    {
+      "seq": 1,
+      "content": "deadline 前一天发现进度落后，你？",
+      "options": [
+        { "key": "A", "label": "通宵硬顶", "score": 4 },
+        { "key": "B", "label": "砍掉非核心先交", "score": 3 },
+        { "key": "C", "label": "同步上级要资源", "score": 2 }
+      ]
+    },
+    {
+      "seq": 2,
+      "content": "被公开质疑方案，你会？",
+      "options": [
+        { "key": "A", "label": "当场逐条回应", "score": 3 },
+        { "key": "B", "label": "会后私聊澄清", "score": 2 },
+        { "key": "C", "label": "先记下来改文档", "score": 4 }
+      ]
+    },
+    {
+      "seq": 3,
+      "content": "连续加班两周，你更想？",
+      "options": [
+        { "key": "A", "label": "请假彻底放空", "score": 2 },
+        { "key": "B", "label": "每天留一小时运动", "score": 3 },
+        { "key": "C", "label": "和朋友吐槽释放", "score": 4 }
+      ]
+    },
+    {
+      "seq": 4,
+      "content": "任务模糊时你通常？",
+      "options": [
+        { "key": "A", "label": "先动手试方向", "score": 4 },
+        { "key": "B", "label": "拉会对齐预期", "score": 2 },
+        { "key": "C", "label": "写清单问关键人", "score": 3 }
+      ]
+    },
+    {
+      "seq": 5,
+      "content": "多项目并行，你的优先级？",
+      "options": [
+        { "key": "A", "label": "老板最急的", "score": 3 },
+        { "key": "B", "label": "自己最难的先啃", "score": 4 },
+        { "key": "C", "label": "能协作丢出去的", "score": 2 }
+      ]
+    },
+    {
+      "seq": 6,
+      "content": "压力大时身体信号？",
+      "options": [
+        { "key": "A", "label": "失眠或早醒", "score": 4 },
+        { "key": "B", "label": "胃紧头痛", "score": 3 },
+        { "key": "C", "label": "还能扛不太明显", "score": 2 }
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "code": "CS_SOLVE",
+      "name": "拆解推进型",
+      "summary": "你习惯用行动消化压力，记得留窗口复盘别只赶路。",
+      "match_config": { "score_min": 12, "score_max": 16 }
+    },
+    {
+      "code": "CS_BAL",
+      "name": "资源协调型",
+      "summary": "你会在硬扛和求助之间找平衡，团队价值常被低估。",
+      "match_config": { "score_min": 17, "score_max": 20 }
+    },
+    {
+      "code": "CS_PUSH",
+      "name": "高压耐受型",
+      "summary": "你能扛事，也要警惕把「还能撑」当成常态。",
+      "match_config": { "score_min": 21, "score_max": 24 }
+    },
+    {
+      "code": "CS_FB",
+      "name": "混合应对型",
+      "summary": "你的应对方式很多样，找到适合自己的恢复仪式更重要。",
+      "is_fallback": true,
+      "match_config": {}
+    }
+  ]
+}

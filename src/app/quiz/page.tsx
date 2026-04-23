@@ -17,12 +17,15 @@ import {
   ListItemMeta,
   ListItemTitle,
 } from "@/components/ui/list";
+import { Badge } from "@/components/ui/badge";
 import { postJson } from "@/lib/client-api";
+import { labelForCategory, quizCategoriesForSelect } from "@/lib/quiz-categories";
 
 type EntryQuiz = {
   id: string;
   name: string;
   description: string;
+  category: string;
 };
 
 type HistoryItem = {
@@ -47,6 +50,7 @@ function QuizEntryContent() {
   const [error, setError] = useState("");
   const [quizzesSettled, setQuizzesSettled] = useState(true);
   const [historySettled, setHistorySettled] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState("");
 
   useEffect(() => {
     if (!token) {
@@ -73,7 +77,12 @@ function QuizEntryContent() {
         setEntryMeta(meta);
 
         const [quizzesRes, historyRes] = await Promise.allSettled([
-          postJson<{ list: EntryQuiz[] }>("/api/quiz_play/entry/quizzes", { token, pageIndex: 1, pageSize: 20 }),
+          postJson<{ list: EntryQuiz[] }>("/api/quiz_play/entry/quizzes", {
+            token,
+            pageIndex: 1,
+            pageSize: 20,
+            ...(categoryFilter ? { category: categoryFilter } : {}),
+          }),
           postJson<{ list: HistoryItem[] }>("/api/quiz_play/entry/history", { token, pageIndex: 1, pageSize: 10 }),
         ]);
         if (cancelled) {
@@ -81,7 +90,13 @@ function QuizEntryContent() {
         }
 
         if (quizzesRes.status === "fulfilled") {
-          setQuizList(quizzesRes.value.list);
+          setQuizList(
+            quizzesRes.value.list.map((row) => ({
+              ...row,
+              category: row.category ?? "fun",
+              description: row.description ?? "",
+            })),
+          );
         } else {
           setQuizList([]);
           setError(quizzesRes.reason instanceof Error ? quizzesRes.reason.message : "测验列表加载失败");
@@ -111,7 +126,7 @@ function QuizEntryContent() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, categoryFilter]);
 
   const tokenStatusText = entryMeta
     ? entryMeta.status === "active"
@@ -144,10 +159,35 @@ function QuizEntryContent() {
             </p>
           ) : null}
           {listLoading ? <ContentLoading label="加载可用测验中…" minHeightClassName="min-h-[5rem]" /> : null}
+          {token ? (
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <label className="text-xs font-medium text-zinc-500 sm:sr-only" htmlFor="quiz-category-filter">
+                测验分类
+              </label>
+              <select
+                id="quiz-category-filter"
+                className="w-full rounded-xl border border-border/60 bg-surface px-3 py-2 text-sm sm:max-w-xs"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+              >
+                <option value="">全部分类</option>
+                {quizCategoriesForSelect().map((row) => (
+                  <option key={row.code} value={row.code}>
+                    {row.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
           <List>
             {quizList.map((quiz) => (
               <ListItem key={quiz.id}>
-                <ListItemTitle>{quiz.name}</ListItemTitle>
+                <ListItemTitle className="flex flex-wrap items-center gap-2">
+                  <span>{quiz.name}</span>
+                  <Badge variant="outline" className="text-xs font-normal">
+                    {labelForCategory(quiz.category)}
+                  </Badge>
+                </ListItemTitle>
                 <ListItemDescription>{quiz.description}</ListItemDescription>
                 <ListItemActions>
                   <Link href={`/quiz/intro?token=${token}&quizId=${quiz.id}`}>

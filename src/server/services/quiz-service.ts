@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { AppError } from "@/lib/errors";
+import { DEFAULT_QUIZ_CATEGORY, normalizeQuizCategory } from "@/lib/quiz-categories";
 import { isDeepAnalysisLlmConfigured } from "@/lib/llm-env";
 import { createId } from "@/lib/id";
 import { requestQuizDeepAnalysis } from "@/server/services/quiz-deep-analysis";
@@ -13,6 +14,7 @@ import {
   createQuizToken,
   deleteQuiz,
   findOutcomeByCode,
+  findQuizByCode,
   findQuizById,
   findQuizResultById,
   findQuizTokenByValue,
@@ -51,12 +53,33 @@ export async function pageQuizzes() {
 }
 
 export async function editQuiz(input: Record<string, unknown>) {
-  const id = String(input.id ?? createId());
+  const code = String(input.code ?? `quiz_${Date.now()}`).trim();
+  const inputId = input.id != null && String(input.id).length > 0 ? String(input.id) : undefined;
+  let id = inputId;
+  if (!id && code) {
+    const byCode = await findQuizByCode(code);
+    if (byCode) {
+      id = byCode.id;
+    }
+  }
+  id = id ?? createId();
+
+  let category = DEFAULT_QUIZ_CATEGORY;
+  if (input.category !== undefined && input.category !== null && input.category !== "") {
+    category = normalizeQuizCategory(input.category);
+  } else {
+    const existing = await findQuizById(id);
+    if (existing?.category) {
+      category = normalizeQuizCategory(existing.category);
+    }
+  }
+
   await saveQuiz({
     id,
     name: String(input.name ?? "未命名测验"),
-    code: String(input.code ?? `quiz_${Date.now()}`),
+    code,
     description: String(input.description ?? ""),
+    category,
     quizType: String(input.quizType ?? "score"),
     status: String(input.status ?? "draft"),
     algoConfig: (input.algoConfig as Record<string, unknown>) ?? {},
@@ -465,6 +488,7 @@ export async function analyzeQuizResultDeep(
 export async function getEntryQuizzes(input: {
   token: string;
   search?: string;
+  category?: string;
   pageIndex: number;
   pageSize: number;
 }) {
@@ -472,6 +496,7 @@ export async function getEntryQuizzes(input: {
   const allowedQuizIds = await listAllowedQuizIdsByTokenId(entry.token.id);
   return listPublishedQuizzes({
     search: input.search,
+    category: input.category,
     pageIndex: input.pageIndex,
     pageSize: input.pageSize,
     allowedIds: allowedQuizIds.length ? allowedQuizIds : undefined,

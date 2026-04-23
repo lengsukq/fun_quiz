@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const repo = vi.hoisted(() => ({
   findQuizTokenByValue: vi.fn(),
   listAllowedQuizIdsByTokenId: vi.fn(),
+  findQuizByCode: vi.fn(),
   findQuizById: vi.fn(),
   listQuizQuestions: vi.fn(),
   listQuizOutcomes: vi.fn(),

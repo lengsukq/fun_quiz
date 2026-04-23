@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "name": "恋爱沟通风格（娱乐版）",
+    "code": "seed_love_communication",
+    "quiz_type": "score",
+    "share_desc": "娱乐向：看看吵架时你更偏「冷处理」还是「当场讲开」。非心理咨询。",
+    "category": "emotion"
+  },
+  "algo_config": { "total_max": 15 },
+  "special_rules": [],
+  "questions": [
+    {
+      "seq": 1,
+      "content": "对方迟到半小时，你第一反应？",
+      "options": [
+        { "key": "A", "label": "先忍，见面再说", "score": 1 },
+        { "key": "B", "label": "发消息问原因", "score": 2 },
+        { "key": "C", "label": "有点火大想吵", "score": 3 }
+      ]
+    },
+    {
+      "seq": 2,
+      "content": "冷战时你更常？",
+      "options": [
+        { "key": "A", "label": "等对方先开口", "score": 1 },
+        { "key": "B", "label": "写小作文理清", "score": 2 },
+        { "key": "C", "label": "当面把话说开", "score": 3 }
+      ]
+    },
+    {
+      "seq": 3,
+      "content": "需要安慰时你希望对方？",
+      "options": [
+        { "key": "A", "label": "安静陪着就好", "score": 1 },
+        { "key": "B", "label": "问我想聊吗", "score": 2 },
+        { "key": "C", "label": "直接给解决方案", "score": 3 }
+      ]
+    },
+    {
+      "seq": 4,
+      "content": "纪念日忘了买礼物，你会？",
+      "options": [
+        { "key": "A", "label": "心里扣分不说", "score": 1 },
+        { "key": "B", "label": "暗示或撒娇提醒", "score": 2 },
+        { "key": "C", "label": "直说我在意这个", "score": 3 }
+      ]
+    },
+    {
+      "seq": 5,
+      "content": "对「已读不回」你的耐受度？",
+      "options": [
+        { "key": "A", "label": "会脑补很多", "score": 3 },
+        { "key": "B", "label": "等几小时再追问", "score": 2 },
+        { "key": "C", "label": "基本无所谓", "score": 1 }
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "code": "LC_SOFT",
+      "name": "迂回表达型",
+      "summary": "你倾向委婉或等待，记得关键需求也要让对方听得见。",
+      "match_config": { "score_min": 0, "score_max": 6 }
+    },
+    {
+      "code": "LC_MID",
+      "name": "有来有往型",
+      "summary": "你愿意沟通也留台阶，关系里弹性不错。",
+      "match_config": { "score_min": 7, "score_max": 10 }
+    },
+    {
+      "code": "LC_DIRECT",
+      "name": "直球行动型",
+      "summary": "你偏好清晰反馈，注意语气也能让直球更甜一点。",
+      "match_config": { "score_min": 11, "score_max": 15 }
+    },
+    {
+      "code": "LC_FB",
+      "name": "自洽型",
+      "summary": "你的沟通画像不太典型，按你舒服的方式相处即可。",
+      "is_fallback": true,
+      "match_config": {}
+    }
+  ]
+}

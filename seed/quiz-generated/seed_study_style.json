@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "name": "学习与拖延小画像",
+    "code": "seed_study_style",
+    "quiz_type": "score",
+    "share_desc": "娱乐向：看看你是「先玩再赶」还是「先苦后甜」型。",
+    "category": "lifestyle"
+  },
+  "algo_config": { "total_max": 18 },
+  "special_rules": [],
+  "questions": [
+    {
+      "seq": 1,
+      "content": "大作业还有两周，你通常？",
+      "options": [
+        { "key": "A", "label": "先开文档写个大纲", "score": 3 },
+        { "key": "B", "label": "中间段慢慢磨", "score": 2 },
+        { "key": "C", "label": "最后三天火力全开", "score": 1 }
+      ]
+    },
+    {
+      "seq": 2,
+      "content": "手机在桌边，学习时你？",
+      "options": [
+        { "key": "A", "label": "番茄钟+勿扰", "score": 3 },
+        { "key": "B", "label": "偶尔摸一下", "score": 2 },
+        { "key": "C", "label": "刷到停不下来", "score": 1 }
+      ]
+    },
+    {
+      "seq": 3,
+      "content": "遇到难题卡住，你？",
+      "options": [
+        { "key": "A", "label": "换题或休息再回", "score": 2 },
+        { "key": "B", "label": "搜解析或问人", "score": 3 },
+        { "key": "C", "label": "硬啃到深夜", "score": 1 }
+      ]
+    },
+    {
+      "seq": 4,
+      "content": "复习计划你更信？",
+      "options": [
+        { "key": "A", "label": "日历细分到小时", "score": 3 },
+        { "key": "B", "label": "列清单完成打勾", "score": 2 },
+        { "key": "C", "label": "心里有数就行", "score": 1 }
+      ]
+    },
+    {
+      "seq": 5,
+      "content": "学习环境你偏好？",
+      "options": [
+        { "key": "A", "label": "图书馆安静区", "score": 3 },
+        { "key": "B", "label": "咖啡厅白噪音", "score": 2 },
+        { "key": "C", "label": "床上被窝最香", "score": 1 }
+      ]
+    },
+    {
+      "seq": 6,
+      "content": "考完试你会？",
+      "options": [
+        { "key": "A", "label": "立刻对答案估分", "score": 3 },
+        { "key": "B", "label": "玩两天再想", "score": 2 },
+        { "key": "C", "label": "假装没考过", "score": 1 }
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "code": "ST_PLAN",
+      "name": "计划先行型",
+      "summary": "结构化让你安心，也允许偶尔弹性防 burnout。",
+      "match_config": { "score_min": 14, "score_max": 18 }
+    },
+    {
+      "code": "ST_MIX",
+      "name": "摇摆实战型",
+      "summary": "你在自律和摸鱼间横跳，小目标比大愿景更管用。",
+      "match_config": { "score_min": 9, "score_max": 13 }
+    },
+    {
+      "code": "ST_LATE",
+      "name": "冲刺爆发型",
+      "summary": "deadline 是第一生产力，试试把终点线画近一点。",
+      "match_config": { "score_min": 0, "score_max": 8 }
+    },
+    {
+      "code": "ST_FB",
+      "name": "自定义学习型",
+      "summary": "你的节奏不好归类，保留有效的那几招就够了。",
+      "is_fallback": true,
+      "match_config": {}
+    }
+  ]
+}

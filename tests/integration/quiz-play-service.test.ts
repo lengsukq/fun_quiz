@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const repo = vi.hoisted(() => ({
   findQuizTokenByValue: vi.fn(),
+  findQuizByCode: vi.fn(),
   listAllowedQuizIdsByTokenId: vi.fn(),
   listPublishedQuizzes: vi.fn(),
   listQuizHistoryByTokenId: vi.fn(),
@@ -58,6 +59,7 @@ describe("quiz-play service behavior", async () => {
     expect(result.total).toBe(1);
     expect(repo.listPublishedQuizzes).toHaveBeenCalledWith({
       search: "",
+      category: undefined,
       pageIndex: 1,
       pageSize: 10,
       allowedIds: ["quiz_1"],

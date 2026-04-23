@@ -128,6 +128,7 @@ export const quizzes = pgTable("bt_quiz", {
   name: varchar("name", { length: 120 }).notNull(),
   code: varchar("code", { length: 120 }).notNull(),
   description: text("description"),
+  category: varchar("category", { length: 32 }).default("fun").notNull(),
   quizType: varchar("quiz_type", { length: 50 }).default("score").notNull(),
   status: varchar("status", { length: 32 }).default("draft").notNull(),
   algoConfig: jsonb("algo_config").$type<Record<string, unknown>>().default({}).notNull(),

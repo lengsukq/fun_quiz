@@ -6,6 +6,7 @@ export const quizEntryItemSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().nullable().optional(),
+  category: z.string().default("fun"),
 });
 
 export const historyItemSchema = z.object({
@@ -19,6 +20,7 @@ export const historyItemSchema = z.object({
 export const entryRequestSchema = z.object({
   token: z.string().min(1),
   search: z.string().optional(),
+  category: z.string().optional(),
   pageIndex: z.number().int().default(1),
   pageSize: z.number().int().default(20),
 });

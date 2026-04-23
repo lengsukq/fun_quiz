@@ -1,4 +1,4 @@
-import { readdir, readFile } from "node:fs/promises";
+import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { AppError } from "@/lib/errors";
@@ -11,6 +11,7 @@ type PythonQuizDefinition = {
     code?: string;
     quiz_type?: string;
     share_desc?: string;
+    category?: string;
     result_config?: Record<string, unknown>;
     fallback_outcome_code?: string;
   };
@@ -42,14 +43,36 @@ function mapQuestionOptions(options: unknown) {
   });
 }
 
+async function resolveQuizJsonDirWithFiles(): Promise<string> {
+  const dir = path.join(process.cwd(), "seed", "quiz-generated");
+  try {
+    await access(dir);
+  } catch {
+    throw new Error("未找到仓库内目录 seed/quiz-generated（请将题库 JSON 放在该目录并纳入 Git 后再执行导入）");
+  }
+  const names = await readdir(dir);
+  if (!names.some((item) => item.toLowerCase().endsWith(".json"))) {
+    throw new Error("seed/quiz-generated 中没有任何 .json 文件，请先添加题库 JSON 后再导入");
+  }
+  return dir;
+}
+
 export async function seedQuizzesFromPythonGenerated(): Promise<SeedSummary> {
-  const generatedDir = path.resolve(process.cwd(), "../python/doc/generated");
-  const generatedFiles = (await readdir(generatedDir))
-    .filter((item) => item.toLowerCase().endsWith(".json"))
-    .sort((a, b) => a.localeCompare(b));
-  const existing = await listQuizzes();
-  const quizCodeMap = new Map(existing.map((item) => [item.code, item.id]));
   const failed: Array<{ file: string; reason: string }> = [];
+  let generatedDir: string;
+  let generatedFiles: string[];
+  try {
+    generatedDir = await resolveQuizJsonDirWithFiles();
+    generatedFiles = (await readdir(generatedDir))
+      .filter((item) => item.toLowerCase().endsWith(".json"))
+      .sort((a, b) => a.localeCompare(b));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "unknown error";
+    throw new AppError(`题库导入失败：${reason}`, 500);
+  }
+
+  const existing = await listQuizzes();
+  const quizCodeMap = new Map(existing.map((item) => [item.code.trim(), item.id]));
   let imported = 0;
   let skipped = 0;
 
@@ -58,7 +81,7 @@ export async function seedQuizzesFromPythonGenerated(): Promise<SeedSummary> {
       const filePath = path.join(generatedDir, fileName);
       const raw = await readFile(filePath, "utf8");
       const payload = JSON.parse(raw) as PythonQuizDefinition;
-      const code = payload.meta?.code;
+      const code = String(payload.meta?.code ?? "").trim();
 
       if (!code) {
         skipped += 1;
@@ -71,6 +94,7 @@ export async function seedQuizzesFromPythonGenerated(): Promise<SeedSummary> {
         name: payload.meta?.name ?? code,
         code,
         description: payload.meta?.share_desc ?? "",
+        category: payload.meta?.category,
         quizType: payload.meta?.quiz_type ?? "score",
         status: "draft",
         algoConfig: payload.algo_config ?? {},

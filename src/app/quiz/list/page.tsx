@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AdminShell } from "@/components/admin/admin-shell";
 import { DataListPanel } from "@/components/admin/data-list-panel";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ContentLoading } from "@/components/ui/loading-state";
 import { postJson } from "@/lib/client-api";
+import { labelForCategory, quizCategoriesForSelect } from "@/lib/quiz-categories";
 
 type QuizItem = {
   id: string;
@@ -19,6 +20,7 @@ type QuizItem = {
   code: string;
   status: string;
   quizType: string;
+  category: string;
 };
 
 export default function QuizListPage() {
@@ -34,6 +36,12 @@ export default function QuizListPage() {
   const [aiQuizType, setAiQuizType] = useState<"score" | "vector" | "branch" | "random">("score");
   const [aiPreview, setAiPreview] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("");
+
+  const visibleList = useMemo(() => {
+    if (!categoryFilter) return list;
+    return list.filter((item) => (item.category ?? "fun") === categoryFilter);
+  }, [list, categoryFilter]);
 
   async function load() {
     setListLoading(true);
@@ -82,7 +90,7 @@ export default function QuizListPage() {
               variant="surface"
               loading={seeding}
               onClick={async () => {
-                if (!window.confirm("将从 python/doc/generated 导入题库（已存在 code 会被更新），继续吗？")) return;
+                if (!window.confirm("将从仓库内 seed/quiz-generated 导入题库（已存在 code 会覆盖更新），继续吗？")) return;
                 setSeeding(true);
                 try {
                   const result = await postJson<{
@@ -132,24 +140,40 @@ export default function QuizListPage() {
           </div>
         }
         filters={
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-3">
             <Input placeholder="测验名称" value={name} onChange={(event) => setName(event.target.value)} />
             <Input placeholder="测验编码" value={code} onChange={(event) => setCode(event.target.value)} />
+            <select
+              className="rounded-xl border border-border/60 bg-surface px-3 py-2 text-sm"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              aria-label="按分类筛选"
+            >
+              <option value="">全部分类</option>
+              {quizCategoriesForSelect().map((row) => (
+                <option key={row.code} value={row.code}>
+                  {row.label}
+                </option>
+              ))}
+            </select>
           </div>
         }
-        headers={["名称", "编码", "类型", "状态", "操作"]}
+        headers={["名称", "编码", "分类", "类型", "状态", "操作"]}
       >
         {listLoading ? (
           <TableRow>
-            <TableCell colSpan={5}>
+            <TableCell colSpan={6}>
               <ContentLoading label="加载列表中…" className="py-4" minHeightClassName="min-h-0" />
             </TableCell>
           </TableRow>
         ) : (
-          list.map((item) => (
+          visibleList.map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.name}</TableCell>
               <TableCell>{item.code}</TableCell>
+              <TableCell>
+                <Badge variant="outline">{labelForCategory(item.category)}</Badge>
+              </TableCell>
               <TableCell>{item.quizType}</TableCell>
               <TableCell>
                 <Badge variant={item.status === "published" ? "success" : "outline"}>{item.status}</Badge>

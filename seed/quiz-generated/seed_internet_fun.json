@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "name": "网络梗浓度小测",
+    "code": "seed_internet_fun",
+    "quiz_type": "score",
+    "share_desc": "娱乐向：测测你是「5G 冲浪」还是「2G 养老」——开心就好。",
+    "category": "fun"
+  },
+  "algo_config": { "total_max": 15 },
+  "special_rules": [],
+  "questions": [
+    {
+      "seq": 1,
+      "content": "看到「遥遥领先」你第一反应？",
+      "options": [
+        { "key": "A", "label": "知道梗出处会接", "score": 3 },
+        { "key": "B", "label": "好像听过不确定", "score": 2 },
+        { "key": "C", "label": "以为是正经夸奖", "score": 1 }
+      ]
+    },
+    {
+      "seq": 2,
+      "content": "「显眼包」是指？",
+      "options": [
+        { "key": "A", "label": "爱出风头但可爱那种", "score": 3 },
+        { "key": "B", "label": "字面意思背包？", "score": 1 },
+        { "key": "C", "label": "好像和社牛有关", "score": 2 }
+      ]
+    },
+    {
+      "seq": 3,
+      "content": "群友发「狗头」你理解成？",
+      "options": [
+        { "key": "A", "label": "反讽保命符", "score": 3 },
+        { "key": "B", "label": "卖萌或调侃", "score": 2 },
+        { "key": "C", "label": "就是真狗头", "score": 1 }
+      ]
+    },
+    {
+      "seq": 4,
+      "content": "「电子榨菜」你？",
+      "options": [
+        { "key": "A", "label": "下饭短视频或剧", "score": 3 },
+        { "key": "B", "label": "吃饭时刷的都算", "score": 2 },
+        { "key": "C", "label": "没听过这个词", "score": 1 }
+      ]
+    },
+    {
+      "seq": 5,
+      "content": "朋友发「yyds」你会？",
+      "options": [
+        { "key": "A", "label": "自然接梗或回 emoji", "score": 3 },
+        { "key": "B", "label": "知道意思偶尔用", "score": 2 },
+        { "key": "C", "label": "要查一下才敢回", "score": 1 }
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "code": "NET_OL",
+      "name": "5G 冲浪选手",
+      "summary": "热梗冷梗你都能接，注意别在长辈群乱飞表情包。",
+      "match_config": { "score_min": 12, "score_max": 15 }
+    },
+    {
+      "code": "NET_MID",
+      "name": "随缘更新型",
+      "summary": "你跟得上大流，偶尔断网也不焦虑。",
+      "match_config": { "score_min": 8, "score_max": 11 }
+    },
+    {
+      "code": "NET_CALM",
+      "name": "佛系接收型",
+      "summary": "你对梗不敏感也没关系，认真生活也很酷。",
+      "match_config": { "score_min": 0, "score_max": 7 }
+    },
+    {
+      "code": "NET_FB",
+      "name": "自定义网速",
+      "summary": "你的梗图雷达不好归类，开心冲浪最重要。",
+      "is_fallback": true,
+      "match_config": {}
+    }
+  ]
+}

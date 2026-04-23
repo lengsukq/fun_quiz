@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "name": "社交能量小测验",
+    "code": "seed_social_energy",
+    "quiz_type": "score",
+    "share_desc": "娱乐向：测测你更偏「宅家充电」还是「出门吸人气」。",
+    "category": "lifestyle"
+  },
+  "algo_config": { "total_max": 18 },
+  "special_rules": [],
+  "questions": [
+    {
+      "seq": 1,
+      "content": "工作日下班后，你更想？",
+      "options": [
+        { "key": "A", "label": "立刻回家躺平", "score": 1 },
+        { "key": "B", "label": "顺路小聚再回", "score": 2 },
+        { "key": "C", "label": "约人吃饭聊天", "score": 3 }
+      ]
+    },
+    {
+      "seq": 2,
+      "content": "陌生聚会里你通常？",
+      "options": [
+        { "key": "A", "label": "角落观察为主", "score": 1 },
+        { "key": "B", "label": "有人搭话就聊", "score": 2 },
+        { "key": "C", "label": "主动破冰找话题", "score": 3 }
+      ]
+    },
+    {
+      "seq": 3,
+      "content": "周末独处一整天，你的感受更接近？",
+      "options": [
+        { "key": "A", "label": "太爽了别叫我", "score": 1 },
+        { "key": "B", "label": "还行但想见人", "score": 2 },
+        { "key": "C", "label": "会闷得发慌", "score": 3 }
+      ]
+    },
+    {
+      "seq": 4,
+      "content": "群聊里你更常？",
+      "options": [
+        { "key": "A", "label": "潜水看戏", "score": 1 },
+        { "key": "B", "label": "偶尔插一句", "score": 2 },
+        { "key": "C", "label": "表情包+接梗主力", "score": 3 }
+      ]
+    },
+    {
+      "seq": 5,
+      "content": "朋友临时约出门，你？",
+      "options": [
+        { "key": "A", "label": "婉拒保睡眠", "score": 1 },
+        { "key": "B", "label": "看心情和距离", "score": 2 },
+        { "key": "C", "label": "换衣服冲", "score": 3 }
+      ]
+    },
+    {
+      "seq": 6,
+      "content": "充电方式你更认同？",
+      "options": [
+        { "key": "A", "label": "安静看书刷剧", "score": 1 },
+        { "key": "B", "label": "运动或短途走走", "score": 2 },
+        { "key": "C", "label": "和好友吐槽大笑", "score": 3 }
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "code": "SE_HOME",
+      "name": "宅系充电型",
+      "summary": "你更享受可控的小世界，社交是精选菜单。尊重自己的节奏就好。",
+      "match_config": { "score_min": 0, "score_max": 7 }
+    },
+    {
+      "code": "SE_BAL",
+      "name": "平衡游走型",
+      "summary": "你能社交也能独处，像手机省电模式与快充切换自如。",
+      "match_config": { "score_min": 8, "score_max": 13 }
+    },
+    {
+      "code": "SE_OUT",
+      "name": "外放吸能型",
+      "summary": "人群和互动常能给你正反馈，记得也留一点空白给自己。",
+      "match_config": { "score_min": 14, "score_max": 18 }
+    },
+    {
+      "code": "SE_FB",
+      "name": "独特节奏型",
+      "summary": "你的答案不太落在常见分段里，保持真实就很好。",
+      "is_fallback": true,
+      "match_config": {}
+    }
+  ]
+}

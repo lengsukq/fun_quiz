@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "name": "情绪节奏小参考（娱乐自测）",
+    "code": "seed_wellbeing_mood",
+    "quiz_type": "score",
+    "share_desc": "娱乐向：粗看你的情绪起伏习惯，不构成任何医学诊断或治疗建议。",
+    "category": "wellbeing"
+  },
+  "algo_config": { "total_max": 18 },
+  "special_rules": [],
+  "questions": [
+    {
+      "seq": 1,
+      "content": "最近一周，起床时心情更常？",
+      "options": [
+        { "key": "A", "label": "还行能启动", "score": 3 },
+        { "key": "B", "label": "有点沉要缓一会", "score": 2 },
+        { "key": "C", "label": "不太想起床", "score": 1 }
+      ]
+    },
+    {
+      "seq": 2,
+      "content": "小事搞砸（如洒了咖啡），你？",
+      "options": [
+        { "key": "A", "label": "擦掉就过", "score": 3 },
+        { "key": "B", "label": "烦几分钟就好", "score": 2 },
+        { "key": "C", "label": "会低落挺久", "score": 1 }
+      ]
+    },
+    {
+      "seq": 3,
+      "content": "对未来一两周，你的感受？",
+      "options": [
+        { "key": "A", "label": "有期待有事做", "score": 3 },
+        { "key": "B", "label": "平淡没特别感觉", "score": 2 },
+        { "key": "C", "label": "有点空或慌", "score": 1 }
+      ]
+    },
+    {
+      "seq": 4,
+      "content": "压力大时你更想？",
+      "options": [
+        { "key": "A", "label": "找人聊聊", "score": 3 },
+        { "key": "B", "label": "运动或出门走走", "score": 2 },
+        { "key": "C", "label": "一个人躲起来", "score": 1 }
+      ]
+    },
+    {
+      "seq": 5,
+      "content": "对自己最近的状态打分倾向？",
+      "options": [
+        { "key": "A", "label": "整体还算满意", "score": 3 },
+        { "key": "B", "label": "有好有坏", "score": 2 },
+        { "key": "C", "label": "不太满意", "score": 1 }
+      ]
+    },
+    {
+      "seq": 6,
+      "content": "如果连续阴天，你更？",
+      "options": [
+        { "key": "A", "label": "开灯该干嘛干嘛", "score": 3 },
+        { "key": "B", "label": "略闷但能调节", "score": 2 },
+        { "key": "C", "label": "容易跟着低落", "score": 1 }
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "code": "WB_UP",
+      "name": "情绪弹性不错",
+      "summary": "你整体调节还可以，保持睡眠与运动会继续加分。",
+      "match_config": { "score_min": 14, "score_max": 18 }
+    },
+    {
+      "code": "WB_MID",
+      "name": "有起伏但可控",
+      "summary": "你有时会被小事牵动，试试固定一个小恢复仪式。",
+      "match_config": { "score_min": 9, "score_max": 13 }
+    },
+    {
+      "code": "WB_LOW",
+      "name": "最近更需要温柔对待自己",
+      "summary": "若低落持续影响生活，建议向信任的人倾诉或寻求专业支持；本结果仅供娱乐参考。",
+      "match_config": { "score_min": 0, "score_max": 8 }
+    },
+    {
+      "code": "WB_FB",
+      "name": "节奏独特型",
+      "summary": "你的情绪画像不好简单归类，倾听身体信号最重要。",
+      "is_fallback": true,
+      "match_config": {}
+    }
+  ]
+}

@@ -11,6 +11,7 @@ const schema = z.object({
   name: z.string().min(1),
   code: z.string().min(1),
   description: z.string().optional(),
+  category: z.string().optional(),
   quizType: z.string().optional(),
   status: z.string().optional(),
   algoConfig: z.record(z.string(), z.unknown()).optional(),

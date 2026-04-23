@@ -16,6 +16,7 @@ export async function listQuizzes() {
 
 export async function listPublishedQuizzes(input: {
   search?: string;
+  category?: string;
   pageIndex: number;
   pageSize: number;
   allowedIds?: string[];
@@ -23,6 +24,9 @@ export async function listPublishedQuizzes(input: {
   const conditions = [eq(quizzes.status, "published")];
   if (input.search) {
     conditions.push(or(ilike(quizzes.name, `%${input.search}%`), ilike(quizzes.code, `%${input.search}%`))!);
+  }
+  if (input.category) {
+    conditions.push(eq(quizzes.category, input.category));
   }
   if (input.allowedIds?.length) {
     conditions.push(inArray(quizzes.id, input.allowedIds));
@@ -46,6 +50,11 @@ export async function listPublishedQuizzes(input: {
 
 export async function findQuizById(quizId: string) {
   const [quiz] = await db.select().from(quizzes).where(eq(quizzes.id, quizId)).limit(1);
+  return quiz ?? null;
+}
+
+export async function findQuizByCode(code: string) {
+  const [quiz] = await db.select().from(quizzes).where(eq(quizzes.code, code)).limit(1);
   return quiz ?? null;
 }
 

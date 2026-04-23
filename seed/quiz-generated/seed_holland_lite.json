@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "name": "霍兰德兴趣极简版（娱乐）",
+    "code": "seed_holland_lite",
+    "quiz_type": "score",
+    "share_desc": "娱乐向：用几道题粗看你更偏「动手」「跟人」还是「琢磨事」。非正式职业测评。",
+    "category": "career"
+  },
+  "algo_config": { "total_max": 18 },
+  "special_rules": [],
+  "questions": [
+    {
+      "seq": 1,
+      "content": "团建活动你更想参加？",
+      "options": [
+        { "key": "A", "label": "户外拓展竞技", "score": 1 },
+        { "key": "B", "label": "桌游聊天局", "score": 2 },
+        { "key": "C", "label": "手工或美食 workshop", "score": 3 }
+      ]
+    },
+    {
+      "seq": 2,
+      "content": "空闲一下午你更可能？",
+      "options": [
+        { "key": "A", "label": "拆个小家电或装家具", "score": 1 },
+        { "key": "B", "label": "约人喝咖啡聊行业", "score": 2 },
+        { "key": "C", "label": "看纪录片或写笔记", "score": 3 }
+      ]
+    },
+    {
+      "seq": 3,
+      "content": "哪种任务让你更有成就感？",
+      "options": [
+        { "key": "A", "label": "把 bug 修到复现不了", "score": 1 },
+        { "key": "B", "label": "谈下一个合作方", "score": 2 },
+        { "key": "C", "label": "把数据讲成故事", "score": 3 }
+      ]
+    },
+    {
+      "seq": 4,
+      "content": "你更欣赏的同事特质？",
+      "options": [
+        { "key": "A", "label": "执行力靠谱", "score": 1 },
+        { "key": "B", "label": "会来事会共情", "score": 2 },
+        { "key": "C", "label": "想法清奇有洞察", "score": 3 }
+      ]
+    },
+    {
+      "seq": 5,
+      "content": "理想 workspace 更接近？",
+      "options": [
+        { "key": "A", "label": "工具墙+双屏", "score": 1 },
+        { "key": "B", "label": "开放工位好聊天", "score": 2 },
+        { "key": "C", "label": "安静角落+白板", "score": 3 }
+      ]
+    },
+    {
+      "seq": 6,
+      "content": "如果免费学一门课？",
+      "options": [
+        { "key": "A", "label": "木工或咖啡拉花", "score": 1 },
+        { "key": "B", "label": "演讲或销售心理学", "score": 2 },
+        { "key": "C", "label": "统计或产品设计", "score": 3 }
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "code": "HL_REAL",
+      "name": "偏现实与操作",
+      "summary": "你喜欢看得见摸得着的进展，适合能「做出东西」的方向。",
+      "match_config": { "score_min": 0, "score_max": 7 }
+    },
+    {
+      "code": "HL_SOC",
+      "name": "偏人际与影响",
+      "summary": "你对人和互动敏感，适合需要说服与协作的场景。",
+      "match_config": { "score_min": 8, "score_max": 11 }
+    },
+    {
+      "code": "HL_INV",
+      "name": "偏研究与构思",
+      "summary": "你爱琢磨「为什么」和「怎么更好」，适合分析与创造型任务。",
+      "match_config": { "score_min": 12, "score_max": 18 }
+    },
+    {
+      "code": "HL_FB",
+      "name": "混搭探索型",
+      "summary": "你的兴趣跨度大，多试几种项目比贴单一标签更准。",
+      "is_fallback": true,
+      "match_config": {}
+    }
+  ]
+}

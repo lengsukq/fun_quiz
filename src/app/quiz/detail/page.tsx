@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { List, ListEmpty, ListItem, ListItemActions, ListItemHeader, ListItemMeta, ListItemTitle } from "@/components/ui/list";
 import { Textarea } from "@/components/ui/textarea";
 import { postJson } from "@/lib/client-api";
+import { quizCategoriesForSelect } from "@/lib/quiz-categories";
 
 type QuestionItem = {
   id?: string;
@@ -31,6 +32,7 @@ function QuizDetailContent() {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("fun");
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [outcomes, setOutcomes] = useState<OutcomeItem[]>([]);
 
@@ -42,6 +44,7 @@ function QuizDetailContent() {
     setName(String(quiz.name ?? ""));
     setCode(String(quiz.code ?? ""));
     setDescription(String(quiz.description ?? ""));
+    setCategory(String(quiz.category ?? "fun"));
     setQuestions(questionList);
     setOutcomes(outcomeList);
   }, [quizId]);
@@ -63,6 +66,18 @@ function QuizDetailContent() {
             <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="测验名称" />
             <Input value={code} onChange={(event) => setCode(event.target.value)} placeholder="测验编码" />
             <Textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="测验描述" />
+            <label className="text-xs font-medium text-zinc-500">分类</label>
+            <select
+              className="w-full max-w-md rounded-xl border border-border/60 bg-surface px-3 py-2 text-sm"
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+            >
+              {quizCategoriesForSelect().map((row) => (
+                <option key={row.code} value={row.code}>
+                  {row.label}
+                </option>
+              ))}
+            </select>
             <Button
               onClick={async () => {
                 await postJson("/api/quiz/edit", {
@@ -70,6 +85,7 @@ function QuizDetailContent() {
                   name,
                   code,
                   description,
+                  category,
                 });
                 await load();
               }}

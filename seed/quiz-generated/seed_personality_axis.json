@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "name": "社交与计划小雷达（向量娱乐）",
+    "code": "seed_personality_axis",
+    "quiz_type": "vector",
+    "share_desc": "娱乐向：二维粗看你是更偏即兴社交还是结构化安排，非 MBTI 官方测验。",
+    "category": "personality",
+    "fallback_outcome_code": "AXIS_FB"
+  },
+  "algo_config": {
+    "dimensions": [
+      { "code": "social", "sort_order": 1 },
+      { "code": "plan", "sort_order": 2 }
+    ],
+    "similarity_threshold": 40
+  },
+  "special_rules": [],
+  "questions": [
+    {
+      "seq": 1,
+      "content": "周末空出来，你更想？",
+      "options": [
+        { "key": "A", "label": "约朋友小聚", "dim_scores": { "social": 4, "plan": 0 } },
+        { "key": "B", "label": "独自放空充电", "dim_scores": { "social": 0, "plan": 2 } }
+      ]
+    },
+    {
+      "seq": 2,
+      "content": "旅行前你做攻略吗？",
+      "options": [
+        { "key": "A", "label": "精确到小时", "dim_scores": { "social": 1, "plan": 4 } },
+        { "key": "B", "label": "只订大交通", "dim_scores": { "social": 2, "plan": 1 } }
+      ]
+    },
+    {
+      "seq": 3,
+      "content": "新项目启动你更？",
+      "options": [
+        { "key": "A", "label": "先拉会对齐人", "dim_scores": { "social": 4, "plan": 2 } },
+        { "key": "B", "label": "先写框架自己啃", "dim_scores": { "social": 1, "plan": 4 } }
+      ]
+    },
+    {
+      "seq": 4,
+      "content": "聚会结束你的感受？",
+      "options": [
+        { "key": "A", "label": "还能续摊", "dim_scores": { "social": 4, "plan": 0 } },
+        { "key": "B", "label": "想立刻回家", "dim_scores": { "social": 0, "plan": 2 } }
+      ]
+    },
+    {
+      "seq": 5,
+      "content": "桌面与日程你更？",
+      "options": [
+        { "key": "A", "label": "整洁清单控", "dim_scores": { "social": 1, "plan": 4 } },
+        { "key": "B", "label": "乱但心里有数", "dim_scores": { "social": 2, "plan": 1 } }
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "code": "AXIS_SOCIAL",
+      "name": "即兴社交型",
+      "summary": "你从互动里拿能量，计划可以松一点更开心。",
+      "match_config": { "dim_vector": [3, 1] }
+    },
+    {
+      "code": "AXIS_PLANNER",
+      "name": "结构掌控型",
+      "summary": "清晰节奏让你安心，也记得留点空白给惊喜。",
+      "match_config": { "dim_vector": [1, 3] }
+    },
+    {
+      "code": "AXIS_BAL",
+      "name": "折中平衡型",
+      "summary": "你能社交也能规划，像切换深浅模式一样灵活。",
+      "match_config": { "dim_vector": [2, 2] }
+    },
+    {
+      "code": "AXIS_FB",
+      "name": "独特混搭型",
+      "summary": "你的偏好不太贴标准模型，保持做自己就好。",
+      "is_fallback": true,
+      "match_config": {}
+    }
+  ]
+}

@@ -105,11 +105,13 @@ yarn db:studio        # 打开 Drizzle Studio
 
 - API: `POST /api/quiz/ai_generate`（请求体含 `prompt`，可选 `quizType`、`persist`；需已登录且具备 `quiz:ai_generate` 权限；依赖与深度分析相同的 `LLM_*` 环境变量）
 
-### 一键导入题库（来自 Python seed）
+### 一键导入题库（JSON seed）
 
 - API: `POST /api/system/seed_quizzes`
-- 数据源：`python/doc/generated/*.json`
-- 行为：按 `meta.code` 幂等导入（存在则更新，不存在则创建）
+- 数据源：仅仓库内 `seed/quiz-generated/*.json`（需纳入 Git；不读取未入库的 `../python/doc/generated` 等本地路径）
+- 行为：按 `meta.code`（trim 后）与库中 `code` 对齐；**已存在则整卷覆盖更新**（题目与结果会替换），**不存在则新建**；不会因重复导入而多出新测验行
+- JSON 可选字段：`meta.category`，取值见应用内分类常量（`personality` / `emotion` / `career` / `wellbeing` / `lifestyle` / `fun`）；缺省为 `fun`
+- **新增 `category` 列后**请执行一次 `yarn db:push` 同步数据库
 - 管理端按钮：测验列表页 `一键导入题库`
 
 ### 一键发布草稿
