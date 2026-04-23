@@ -1,4 +1,5 @@
-import { requireAuth } from "@/lib/auth/guard";
+import { requireAuthWithPermission } from "@/lib/auth/guard";
+import { PERM } from "@/lib/rbac/permission-codes";
 import { withApi } from "@/lib/http";
 import { findWebUserById, queryRoleCodesByUserId } from "@/server/repositories/user-repository";
 
@@ -10,7 +11,7 @@ type Props = {
 
 export async function GET(_: Request, props: Props) {
   return withApi(async () => {
-    await requireAuth(["SUPER_ADMIN", "ADMIN"]);
+    await requireAuthWithPermission([PERM.sysUser]);
     const { userId } = await props.params;
     const user = await findWebUserById(userId);
     if (!user) return null;

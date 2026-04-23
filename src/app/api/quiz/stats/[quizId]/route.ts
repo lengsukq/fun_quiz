@@ -2,7 +2,8 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { quizResults } from "@/db/schema/core";
-import { requireAuth } from "@/lib/auth/guard";
+import { requireAuthWithPermission } from "@/lib/auth/guard";
+import { PERM } from "@/lib/rbac/permission-codes";
 import { withApi } from "@/lib/http";
 
 type Props = {
@@ -11,7 +12,7 @@ type Props = {
 
 export async function POST(_: Request, props: Props) {
   return withApi(async () => {
-    await requireAuth();
+    await requireAuthWithPermission([PERM.quizRead]);
     const { quizId } = await props.params;
     const rows = await db.select().from(quizResults).where(eq(quizResults.quizId, quizId));
     const outcomeDistribution: Record<string, number> = {};

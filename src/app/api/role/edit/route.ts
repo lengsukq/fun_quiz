@@ -3,7 +3,8 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { roles } from "@/db/schema/core";
-import { requireAuth } from "@/lib/auth/guard";
+import { requireAuthWithPermission } from "@/lib/auth/guard";
+import { PERM } from "@/lib/rbac/permission-codes";
 import { createId } from "@/lib/id";
 import { withApi } from "@/lib/http";
 import { parseJsonBody } from "@/lib/request";
@@ -18,7 +19,7 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   return withApi(async () => {
-    await requireAuth(["SUPER_ADMIN"]);
+    await requireAuthWithPermission([PERM.sysRoleAdmin]);
     const body = await parseJsonBody(request, schema);
     const id = body.id ?? createId();
     const [exists] = await db.select().from(roles).where(eq(roles.id, id)).limit(1);

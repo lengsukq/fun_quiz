@@ -1,21 +1,19 @@
 import { z } from "zod";
 
-import { requireAuth } from "@/lib/auth/guard";
+import { quizImportDefinitionSchema } from "@/contracts/quiz-ai-definition";
+import { requireAuthWithPermission } from "@/lib/auth/guard";
+import { PERM } from "@/lib/rbac/permission-codes";
 import { withApi } from "@/lib/http";
 import { parseJsonBody } from "@/lib/request";
 import { editQuiz, saveOutcomes, saveQuestions } from "@/server/services/quiz-service";
 
 const schema = z.object({
-  definition: z.object({
-    quiz: z.record(z.string(), z.unknown()),
-    questions: z.array(z.record(z.string(), z.unknown())).default([]),
-    outcomes: z.array(z.record(z.string(), z.unknown())).default([]),
-  }),
+  definition: quizImportDefinitionSchema,
 });
 
 export async function POST(request: Request) {
   return withApi(async () => {
-    await requireAuth(["SUPER_ADMIN", "ADMIN"]);
+    await requireAuthWithPermission([PERM.quizImport]);
     const body = await parseJsonBody(request, schema);
     const saved = await editQuiz(body.definition.quiz);
     await saveQuestions(saved.id, body.definition.questions);

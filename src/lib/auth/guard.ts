@@ -4,6 +4,8 @@ import { AppError } from "@/lib/errors";
 import { getAccessTokenCookie } from "@/lib/auth/session";
 import { verifyAccessToken, type JwtPayload } from "@/lib/auth/token";
 import { findSessionByAccessToken, isTokenBlacklisted } from "@/server/repositories/auth-session-repository";
+import { hasAnyAssignedPermission, isSuperAdminRole } from "@/lib/auth/rbac-check";
+import { listPermissionCodesForWebUser } from "@/server/repositories/rbac-repository";
 
 export async function requireAuth(requiredRoleCodes?: string[]): Promise<JwtPayload> {
   const headerStore = await headers();
@@ -39,5 +41,29 @@ export async function requireAuth(requiredRoleCodes?: string[]): Promise<JwtPayl
     }
   }
 
+  return payload;
+}
+
+/** 已登录 + 任一权限码命中（SUPER_ADMIN 角色跳过库权限校验） */
+export async function requireAuthWithPermission(permissionCodes: string[]): Promise<JwtPayload> {
+  const payload = await requireAuth();
+  if (isSuperAdminRole(payload.roleCodes)) {
+    return payload;
+  }
+  if (!permissionCodes.length) {
+    throw new AppError("Forbidden", 403);
+  }
+  const granted = await listPermissionCodesForWebUser(payload.webUserId);
+  if (!hasAnyAssignedPermission(granted, permissionCodes)) {
+    throw new AppError("Forbidden", 403);
+  }
+  return payload;
+}
+
+export async function requireSuperAdmin(): Promise<JwtPayload> {
+  const payload = await requireAuth();
+  if (!payload.roleCodes.includes("SUPER_ADMIN")) {
+    throw new AppError("Forbidden", 403);
+  }
   return payload;
 }

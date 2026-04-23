@@ -22,6 +22,7 @@ import {
   findWebUserById,
   queryRoleCodesByUserId,
 } from "@/server/repositories/user-repository";
+import { ensureDefaultRbacSeed } from "@/server/bootstrap/rbac-seed";
 import { findRoleByCode, upsertBuiltinRoles } from "@/server/repositories/role-repository";
 
 export async function registerWebUser(input: {
@@ -30,6 +31,7 @@ export async function registerWebUser(input: {
   password: string;
 }) {
   await upsertBuiltinRoles();
+  await ensureDefaultRbacSeed();
   const exists = await findWebUserByAccount(input.account);
   if (exists) {
     throw new AppError("Account already exists", 400);
@@ -76,6 +78,9 @@ export async function loginWebUser(input: {
   if (!isValid) {
     throw new AppError("Account or password is invalid", 400);
   }
+
+  await upsertBuiltinRoles();
+  await ensureDefaultRbacSeed();
 
   const roleCodes = await queryRoleCodesByUserId(user.id);
   const currentRoleCode = roleCodes[0];

@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { randomBytes } from "node:crypto";
 
-import { requireAuth } from "@/lib/auth/guard";
+import { requireAuthWithPermission } from "@/lib/auth/guard";
+import { PERM } from "@/lib/rbac/permission-codes";
 import { hashPassword } from "@/lib/auth/password";
 import { withApi } from "@/lib/http";
 import { parseJsonBody } from "@/lib/request";
@@ -14,7 +15,7 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   return withApi(async () => {
-    await requireAuth(["SUPER_ADMIN", "ADMIN"]);
+    await requireAuthWithPermission([PERM.sysUser]);
     const body = await parseJsonBody(request, schema);
     const user = await findWebUserById(body.userId);
     if (!user) throw new Error("user not found");

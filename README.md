@@ -101,6 +101,10 @@ yarn db:studio        # 打开 Drizzle Studio
 - 能力：初始化角色与管理员账号
 - 生产环境默认受 `BOOTSTRAP_ALLOW_IN_PROD` 限制
 
+### AI 辅助生成测验结构
+
+- API: `POST /api/quiz/ai_generate`（请求体含 `prompt`，可选 `quizType`、`persist`；需已登录且具备 `quiz:ai_generate` 权限；依赖与深度分析相同的 `LLM_*` 环境变量）
+
 ### 一键导入题库（来自 Python seed）
 
 - API: `POST /api/system/seed_quizzes`

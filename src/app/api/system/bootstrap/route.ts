@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 
-import { requireAuth } from "@/lib/auth/guard";
+import { requireSuperAdmin } from "@/lib/auth/guard";
 import { env } from "@/lib/env";
 import { AppError } from "@/lib/errors";
 import { withApi } from "@/lib/http";
@@ -23,7 +23,7 @@ export async function POST() {
 
     const bootstrapped = await isSystemBootstrapped();
     if (bootstrapped) {
-      await requireAuth(["SUPER_ADMIN"]);
+      await requireSuperAdmin();
     }
 
     return bootstrapSystemData();

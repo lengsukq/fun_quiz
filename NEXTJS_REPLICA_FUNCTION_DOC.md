@@ -445,6 +445,10 @@
 - `quiz-play-service.ts`
 - `quiz-stats-service.ts`
 
+## 6.3 API 权限码（Next 已实现）
+
+管理类接口在 `requireAuth` 之后使用 `requireAuthWithPermission` + `ct_permission` / `ct_permission_assign`（登录与 bootstrap 会幂等种子）。`SUPER_ADMIN` 角色跳过库权限校验。权限码定义见 [`src/lib/rbac/permission-codes.ts`](src/lib/rbac/permission-codes.ts)，与路由对应关系包括：`quiz:read`（列表/详情/题目结果读/统计）、`quiz:write`、`quiz:delete`、`quiz:publish`（状态/一键发布/种子导入）、`quiz:import`、`quiz:ai_generate`、`quiz:token`；`sys:user`、`sys:org`、`sys:dept`、`sys:invite`、`sys:storage`；`sys:role:read` / `sys:role:admin`；`sys:menu:read` / `sys:menu:admin`；`sys:permission:read` / `sys:permission:admin`；`sys:backend_api:admin`。`POST /api/quiz/ai_generate` 使用 `quiz:ai_generate` 与 `LLM_*`。
+
 ---
 
 ## 7. 分阶段落地计划（推荐顺序）

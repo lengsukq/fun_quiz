@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { roles, webUsers } from "@/db/schema/core";
 import { hashPassword } from "@/lib/auth/password";
 import { createId } from "@/lib/id";
+import { ensureDefaultRbacSeed } from "@/server/bootstrap/rbac-seed";
 import { upsertBuiltinRoles } from "@/server/repositories/role-repository";
 import { bindRoleToUser, findWebUserByAccount } from "@/server/repositories/user-repository";
 
@@ -15,6 +16,7 @@ export async function isSystemBootstrapped() {
 
 export async function bootstrapSystemData() {
   await upsertBuiltinRoles();
+  await ensureDefaultRbacSeed();
 
   const adminAccount = "admin";
   const initialPassword = randomBytes(9).toString("base64url");

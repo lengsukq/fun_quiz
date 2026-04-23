@@ -1,4 +1,5 @@
-import { requireAuth } from "@/lib/auth/guard";
+import { requireAuthWithPermission } from "@/lib/auth/guard";
+import { PERM } from "@/lib/rbac/permission-codes";
 import { env } from "@/lib/env";
 import { AppError } from "@/lib/errors";
 import { withApi } from "@/lib/http";
@@ -11,7 +12,7 @@ export async function POST() {
       throw new AppError("Quiz seed is disabled in production", 403);
     }
 
-    await requireAuth(["SUPER_ADMIN", "ADMIN"]);
+    await requireAuthWithPermission([PERM.quizPublish]);
     return seedQuizzesFromPythonGenerated();
   });
 }

@@ -2,7 +2,8 @@ import { asc } from "drizzle-orm";
 
 import { db } from "@/db";
 import { organizations } from "@/db/schema/core";
-import { requireAuth } from "@/lib/auth/guard";
+import { requireAuthWithPermission } from "@/lib/auth/guard";
+import { PERM } from "@/lib/rbac/permission-codes";
 import { withApi } from "@/lib/http";
 
 function buildTree(items: Array<typeof organizations.$inferSelect>, parentId: string | null = null): Array<Record<string, unknown>> {
@@ -16,7 +17,7 @@ function buildTree(items: Array<typeof organizations.$inferSelect>, parentId: st
 
 export async function POST() {
   return withApi(async () => {
-    await requireAuth();
+    await requireAuthWithPermission([PERM.sysOrg]);
     const list = await db.select().from(organizations).orderBy(asc(organizations.seq), asc(organizations.createdAt));
     const tree = buildTree(list);
     return {

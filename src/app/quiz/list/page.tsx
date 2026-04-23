@@ -7,6 +7,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { DataListPanel } from "@/components/admin/data-list-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ContentLoading } from "@/components/ui/loading-state";
@@ -28,6 +29,11 @@ export default function QuizListPage() {
   const [publishing, setPublishing] = useState(false);
   const [listLoading, setListLoading] = useState(true);
   const [createLoading, setCreateLoading] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiQuizType, setAiQuizType] = useState<"score" | "vector" | "branch" | "random">("score");
+  const [aiPreview, setAiPreview] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
 
   async function load() {
     setListLoading(true);
@@ -49,6 +55,9 @@ export default function QuizListPage() {
         title="测验管理"
         actions={
           <div className="flex flex-wrap gap-2">
+            <Button variant="surface" onClick={() => setAiOpen(true)}>
+              AI 生成测验
+            </Button>
             <Button
               variant="surface"
               loading={publishing}
@@ -168,6 +177,93 @@ export default function QuizListPage() {
           ))
         )}
       </DataListPanel>
+
+      <Dialog open={aiOpen} onOpenChange={setAiOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>AI 生成测验</DialogTitle>
+            <DialogDescription>依赖服务端 LLM_* 配置。可先预览 JSON，确认后再写入题库。</DialogDescription>
+          </DialogHeader>
+          <div className="flex max-h-[50dvh] flex-col gap-3 overflow-y-auto px-1">
+            <label className="text-xs font-medium text-zinc-500">题型</label>
+            <select
+              className="rounded-xl border border-border/60 bg-surface px-3 py-2 text-sm"
+              value={aiQuizType}
+              onChange={(e) => setAiQuizType(e.target.value as typeof aiQuizType)}
+            >
+              <option value="score">score（累分）</option>
+              <option value="vector">vector（向量）</option>
+              <option value="branch">branch（分支）</option>
+              <option value="random">random（加权随机）</option>
+            </select>
+            <label className="text-xs font-medium text-zinc-500">需求描述</label>
+            <textarea
+              className="min-h-[120px] rounded-xl border border-border/60 bg-surface px-3 py-2 text-sm"
+              placeholder="例如：5 道生活方式题，3 个结果，轻松幽默风格…"
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+            />
+            {aiPreview ? (
+              <>
+                <label className="text-xs font-medium text-zinc-500">预览（definition JSON）</label>
+                <pre className="max-h-40 overflow-auto rounded-xl bg-zinc-950/90 p-3 text-xs text-zinc-100">{aiPreview}</pre>
+              </>
+            ) : null}
+          </div>
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="surface"
+              loading={aiLoading}
+              disabled={!aiPrompt.trim()}
+              onClick={async () => {
+                setAiLoading(true);
+                try {
+                  const res = await postJson<{ definition: unknown }>("/api/quiz/ai_generate", {
+                    prompt: aiPrompt.trim(),
+                    quizType: aiQuizType,
+                    persist: false,
+                  });
+                  setAiPreview(JSON.stringify(res.definition, null, 2));
+                } catch (error) {
+                  window.alert(error instanceof Error ? error.message : "生成失败");
+                } finally {
+                  setAiLoading(false);
+                }
+              }}
+            >
+              仅预览
+            </Button>
+            <Button
+              loading={aiLoading}
+              disabled={!aiPrompt.trim()}
+              onClick={async () => {
+                if (!window.confirm("将调用大模型并直接写入新测验，继续吗？")) return;
+                setAiLoading(true);
+                try {
+                  const res = await postJson<{ quiz_id: string | null }>("/api/quiz/ai_generate", {
+                    prompt: aiPrompt.trim(),
+                    quizType: aiQuizType,
+                    persist: true,
+                  });
+                  setAiOpen(false);
+                  setAiPrompt("");
+                  setAiPreview("");
+                  await load();
+                  if (res.quiz_id) {
+                    window.location.href = `/quiz/detail?id=${res.quiz_id}`;
+                  }
+                } catch (error) {
+                  window.alert(error instanceof Error ? error.message : "保存失败");
+                } finally {
+                  setAiLoading(false);
+                }
+              }}
+            >
+              生成并保存
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminShell>
   );
 }

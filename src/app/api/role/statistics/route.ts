@@ -1,11 +1,12 @@
 import { db } from "@/db";
 import { roles } from "@/db/schema/core";
-import { requireAuth } from "@/lib/auth/guard";
+import { requireAuthWithPermission } from "@/lib/auth/guard";
+import { PERM } from "@/lib/rbac/permission-codes";
 import { withApi } from "@/lib/http";
 
 export async function GET() {
   return withApi(async () => {
-    await requireAuth(["SUPER_ADMIN", "ADMIN"]);
+    await requireAuthWithPermission([PERM.sysRoleRead]);
     const list = await db.select().from(roles);
     return {
       total: list.length,
