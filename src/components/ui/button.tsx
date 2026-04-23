@@ -36,11 +36,10 @@ const buttonVariants = cva(
   },
 );
 
-const spinnerSize: Record<"default" | "sm" | "lg" | null, string> = {
+const spinnerSize: Record<"default" | "sm" | "lg", string> = {
   default: "size-4",
   sm: "size-3.5",
   lg: "size-[1.1rem]",
-  null: "size-4",
 };
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
@@ -60,7 +59,12 @@ export function Button({ className, variant, size, loading, disabled, children, 
       data-loading={isBusy ? "" : undefined}
       {...props}
     >
-      {isBusy ? <Loader2 className={cn("shrink-0 animate-spin", spinnerSize[size ?? "default"])} aria-hidden /> : null}
+      {isBusy ? (
+        <Loader2
+          className={cn("shrink-0 animate-spin", spinnerSize[(size ?? "default") as keyof typeof spinnerSize])}
+          aria-hidden
+        />
+      ) : null}
       {children}
     </button>
   );

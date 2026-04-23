@@ -6,6 +6,7 @@ import type { CSSProperties } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { QuizPageFallback, QuizPageShell } from "@/components/quiz/quiz-page-shell";
+import { ShareResultPreviewDialog } from "@/components/quiz/share-result-preview-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,12 @@ function QuizResultContent() {
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisError, setAnalysisError] = useState("");
   const [analysisStyle, setAnalysisStyle] = useState<DeepAnalysisStyle | null>(null);
+  const [sharePreviewOpen, setSharePreviewOpen] = useState(false);
+  const [pageUrl, setPageUrl] = useState("");
+
+  useEffect(() => {
+    setPageUrl(typeof window === "undefined" ? "" : window.location.href);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!resultId || !token) {
@@ -62,6 +69,16 @@ function QuizResultContent() {
 
   return (
     <QuizPageShell vibrant={!customBg} backgroundStyle={customBg}>
+      {result ? (
+        <ShareResultPreviewDialog
+          open={sharePreviewOpen}
+          onOpenChange={setSharePreviewOpen}
+          result={result}
+          pageUrl={pageUrl}
+          useHero={useHero}
+          deepAnalysis={analysis}
+        />
+      ) : null}
       <div className="space-y-4">
         {result && (
           <p className="text-center text-sm text-zinc-600/90" style={useHero ? { color: "rgba(255,255,255,0.75)" } : undefined}>
@@ -223,8 +240,15 @@ function QuizResultContent() {
                 </Button>
               </Link>
               <Button
-                variant="secondary"
-                className="w-full sm:w-auto"
+                type="button"
+                variant="outline"
+                className={cn(
+                  "w-full sm:w-auto",
+                  "border-violet-200/90 bg-violet-50/50 text-violet-900",
+                  "shadow-[var(--shadow-surface)] hover:border-violet-300/80 hover:bg-violet-100/70 hover:text-violet-950",
+                  "active:bg-violet-100/60",
+                  "focus-visible:ring-violet-400/45 dark:border-violet-500/30 dark:bg-violet-950/20 dark:text-violet-100 dark:hover:border-violet-400/45 dark:hover:bg-violet-900/35",
+                )}
                 disabled={
                   !result?.deepAnalysisAvailable ||
                   analysisStyle === null ||
@@ -264,18 +288,10 @@ function QuizResultContent() {
               </Button>
               <Button
                 className="w-full sm:w-auto"
-                onClick={async () => {
-                  const name = result?.outcomeName ?? "";
-                  const summary = result?.outcomeSummary ? `${name} — ${result.outcomeSummary}` : name;
-                  if (navigator.share) {
-                    await navigator.share({
-                      title: result?.quizName || "我的测验结果",
-                      text: summary || `我的结果是：${name}`,
-                      url: window.location.href,
-                    });
-                    return;
-                  }
-                  await navigator.clipboard.writeText(window.location.href);
+                disabled={!result}
+                onClick={() => {
+                  if (!result) return;
+                  setSharePreviewOpen(true);
                 }}
               >
                 分享结果
