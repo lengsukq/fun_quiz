@@ -307,11 +307,12 @@ export async function submitQuiz(input: { token: string; quizId: string; answers
       seq: item.seq,
       isHidden: item.isHidden,
       options: (item.options as Array<Record<string, unknown>>).map((opt) => ({
-        key: String(opt.key ?? ""),
+        // 与 Python / 题面 JSON 一致：多数字段为 code 或仅填其一；无 key 时必须回退到 code 否则匹配度恒为 0
+        key: String(opt.key ?? opt.code ?? ""),
         score: Number(opt.score ?? 0),
         nextQuestionSeq: opt.nextQuestionSeq !== undefined ? Number(opt.nextQuestionSeq) : undefined,
         outcomeCode: opt.outcomeCode ? String(opt.outcomeCode) : undefined,
-        dimScores: (opt.dimScores as Record<string, number>) ?? {},
+        dimScores: ((opt.dim_scores ?? opt.dimScores) as Record<string, number>) ?? {},
       })),
     })),
     outcomes: outcomes.map((item) => ({

@@ -32,7 +32,7 @@ function mapQuestionOptions(options: unknown) {
   return options.map((option) => {
     const row = (option ?? {}) as Record<string, unknown>;
     return {
-      key: String(row.key ?? ""),
+      key: String(row.key ?? row.code ?? ""),
       label: String(row.label ?? ""),
       score: row.score !== undefined ? Number(row.score) : undefined,
       dimScores: (row.dim_scores ?? row.dimScores ?? {}) as Record<string, number>,

@@ -1,5 +1,7 @@
 type QuestionOption = {
   key?: string;
+  /** 与 Python/旧 JSON 的 code 一致；无 key 时与提交上来的 option 对齐用 */
+  code?: string;
   score?: number;
   nextQuestionSeq?: number;
   outcomeCode?: string;
@@ -204,7 +206,13 @@ function calculateRandomMode(input: CalcInput): CalcResult {
 function answersToOption(answers: Record<string, string>, question: Question): QuestionOption | null {
   const answerKey = answers[String(question.seq)];
   if (!answerKey) return null;
-  return question.options.find((item) => item.key === answerKey) ?? null;
+  return (
+    question.options.find((item) => {
+      if (item.key === answerKey) return true;
+      if (item.code != null && String(item.code) === answerKey) return true;
+      return false;
+    }) ?? null
+  );
 }
 
 export function calculateQuizResult(input: CalcInput): CalcResult {

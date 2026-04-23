@@ -24,6 +24,27 @@ describe("calculateQuizResult", () => {
     expect(result.score).toBe(80);
   });
 
+  it("score模式仅填 code 无 key 时仍按用户所选累加", () => {
+    const result = calculateQuizResult({
+      quizType: "score",
+      answers: { "1": "A" },
+      questions: [
+        {
+          seq: 1,
+          options: [{ key: "", code: "A", score: 8 }],
+        },
+      ],
+      outcomes: [
+        { code: "LOW", matchConfig: { score_min: 0, score_max: 5 } },
+        { code: "HIGH", matchConfig: { score_min: 6, score_max: 100 } },
+      ],
+      algoConfig: { total_max: 10 },
+      specialRules: [],
+    });
+    expect(result.outcomeCode).toBe("HIGH");
+    expect(result.score).toBe(80);
+  });
+
   it("special规则优先覆盖算法结果", () => {
     const result = calculateQuizResult({
       quizType: "score",

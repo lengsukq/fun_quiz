@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
+import { QRCodeSVG } from "qrcode.react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -292,16 +293,44 @@ export function ShareResultPreviewDialog({ open, onOpenChange, result, pageUrl, 
                   匹配度 <span className="text-xl font-bold tabular-nums">{result.score}%</span>
                 </p>
                 <SystemAndAiBlocks result={result} deepAnalysis={deepAnalysis} layout="composed" useHero={useHero} />
-                <p
-                  className={cn(
-                    "mt-3 border-t pt-3 text-[0.7rem] leading-tight",
-                    useHero ? "border-slate-200 text-slate-500" : "border-white/20 text-white/70",
-                  )}
-                >
-                  扫码或打开链接查看
-                  <br />
-                  <span className="break-all font-mono">{(pageUrl || "").slice(0, 200)}</span>
-                </p>
+                {pageUrl ? (
+                  <div
+                    className={cn(
+                      "mt-3 flex flex-col items-center border-t pt-3",
+                      useHero ? "border-slate-200" : "border-white/20",
+                    )}
+                    aria-label="结果页链接二维码"
+                  >
+                    <div
+                      className={cn(
+                        "rounded-2xl bg-white p-3",
+                        "ring-1 shadow-lg",
+                        useHero
+                          ? "ring-slate-200/90 shadow-violet-200/30"
+                          : "ring-white/40 shadow-[0_12px_32px_rgba(0,0,0,0.35)]",
+                      )}
+                    >
+                      <div className="overflow-hidden rounded-lg bg-white">
+                        <QRCodeSVG
+                          value={pageUrl}
+                          size={132}
+                          level="M"
+                          includeMargin
+                          bgColor="#ffffff"
+                          fgColor="#4c1d95"
+                        />
+                      </div>
+                    </div>
+                    <p
+                      className={cn(
+                        "mt-2 text-center text-[0.7rem] font-medium tracking-wide",
+                        useHero ? "text-slate-500" : "text-white/65",
+                      )}
+                    >
+                      扫码打开结果页
+                    </p>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
